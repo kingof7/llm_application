@@ -1,3 +1,4 @@
+# Linux / MacOS
 $ brew install pyenv pyenv-virtualenv
 
 $ export PYENV_PATH=$HOME/.pyenv
@@ -13,3 +14,8 @@ $ pyenv local streamlit
 $ touch chat.py
 $ streamlit run chat.py
 $ ~/.pyenv/shims/streamlit run chat.py
+
+# Windows
+$ pyenv versions
+$ cd streamlit
+$ pyenv local 3.10.11
