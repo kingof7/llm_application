@@ -24,7 +24,7 @@ llm = None
 def initialize_database():
     embedding = UpstageEmbeddings(model="solar-embedding-1-large")
     index_name = 'table-markdown-index'
-    loader = Docx2txtLoader("../tax_with_markdown.docx")
+    loader = Docx2txtLoader("./tax_with_markdown.docx")
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
     document_list = loader.load_and_split(text_splitter=text_splitter)
     chunked_documents = text_splitter.split_documents(document_list)
