@@ -59,7 +59,7 @@ def get_session_history(session_id: str) -> BaseChatMessageHistory:
 
 
 def get_retriever():
-    embedding = OpenAIEmbeddings(model='text-embedding-3-large')
+    embedding = UpstageEmbeddings(model="solar-embedding-1-large")
     index_name = 'table-markdown-index'
     database = PineconeVectorStore.from_documents(
         documents=[],  # Start with an empty list
@@ -95,8 +95,8 @@ def get_history_retriever():
     return history_aware_retriever
 
 
-def get_llm(model='gpt-4o'):
-    llm = ChatOpenAI(model=model)
+def get_llm():
+    llm = ChatUpstage()
     return llm
 
 
