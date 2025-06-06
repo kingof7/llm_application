@@ -1,3 +1,7 @@
+import streamlit as st
+from langchain_upstage import UpstageEmbeddings, ChatUpstage
+from langchain_community.document_loaders import Docx2txtLoader
+from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder, FewShotChatMessagePromptTemplate
 from langchain.chains import create_history_aware_retriever, create_retrieval_chain
@@ -13,7 +17,40 @@ from langchain_core.runnables.history import RunnableWithMessageHistory
 from config import answer_examples
 
 store = {}
+database = None  # Global variable to store the database instance
+llm = None
 
+@st.cache_resource
+def initialize_database():
+    embedding = UpstageEmbeddings(model="solar-embedding-1-large")
+    index_name = 'table-markdown-index'
+    loader = Docx2txtLoader("../tax_with_markdown.docx")
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
+    document_list = loader.load_and_split(text_splitter=text_splitter)
+    chunked_documents = text_splitter.split_documents(document_list)
+
+    database = PineconeVectorStore.from_documents(
+        documents=[],  # Start with an empty list
+        embedding=embedding,
+        index_name=index_name
+    )
+
+    batch_size = 100
+    for i in range(0, len(chunked_documents), batch_size):
+        batch = chunked_documents[i:i + batch_size]
+        database.add_documents(batch)
+    return database
+
+@st.cache_resource
+def initialize_llm():
+    return ChatUpstage()
+
+# Ensure initialize_database() runs only once
+if database is None:
+    database = initialize_database()
+
+if llm is None:
+    llm = initialize_llm()
 
 def get_session_history(session_id: str) -> BaseChatMessageHistory:
     if session_id not in store:
@@ -23,7 +60,7 @@ def get_session_history(session_id: str) -> BaseChatMessageHistory:
 
 def get_retriever():
     embedding = OpenAIEmbeddings(model='text-embedding-3-large')
-    index_name = 'tax-markdown-index'
+    index_name = 'table-markdown-index'
     database = PineconeVectorStore.from_existing_index(index_name=index_name, embedding=embedding)
     retriever = database.as_retriever(search_kwargs={'k': 4})
     return retriever
