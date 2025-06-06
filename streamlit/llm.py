@@ -61,7 +61,11 @@ def get_session_history(session_id: str) -> BaseChatMessageHistory:
 def get_retriever():
     embedding = OpenAIEmbeddings(model='text-embedding-3-large')
     index_name = 'table-markdown-index'
-    database = PineconeVectorStore.from_existing_index(index_name=index_name, embedding=embedding)
+    database = PineconeVectorStore.from_documents(
+        documents=[],  # Start with an empty list
+        embedding=embedding,
+        index_name=index_name
+    )
     retriever = database.as_retriever(search_kwargs={'k': 4})
     return retriever
 
