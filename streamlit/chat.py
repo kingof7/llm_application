@@ -1,9 +1,8 @@
 import streamlit as st
-from langchain_upstage import UpstageEmbeddings
+from langchain_upstage import UpstageEmbeddings, ChatUpstage
 from langchain_community.document_loaders import Docx2txtLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_pinecone import PineconeVectorStore
-from langchain_upstage import ChatUpstage
 from langchain import hub
 from langchain.chains import RetrievalQA
 from langchain_core.output_parsers import StrOutputParser
@@ -22,7 +21,7 @@ if "database" not in st.session_state:
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
     document_list = loader.load_and_split(text_splitter=text_splitter)
     chunked_documents = text_splitter.split_documents(document_list)
-    # Initialize the PineconeVectorStore 
+    # Initialize the PineconeVectorStore
     database = PineconeVectorStore.from_documents(
         documents=[],  # Start with an empty list
         embedding=embedding,
@@ -68,9 +67,9 @@ def get_ai_message(user_message):
         사용자의 질문을 보고, 우리의 사전을 참고해서 사용자의 질문을 변경해주세요.
         만약 변경할 필요가 없다고 판단된다면, 사용자의 질문을 변경하지 마세요.
         그런 경우에는 질문만 리턴해주세요.
-                                            
+
         사전: {dictionary}
-        사용자의 질문: {{user_message}}
+        사용자의 질문: {user_message}
     """)
     dictionary_chain = prompt | llm | StrOutputParser()
     tax_chain = {"query": dictionary_chain} | qa_chain
@@ -82,8 +81,9 @@ if user_question := st.chat_input(placeholder="소득세 관련 질문을 해보
         st.write(user_question) # 질문 남기기
     st.session_state.message_list.append({"role": "user", "content": user_question})
 
-    ai_message = get_ai_message(user_question)
-    with st.chat_message("ai"):
-        st.write(ai_message) # 질문 남기기
-    st.session_state.message_list.append({"role": "ai", "content": ai_message})
+    with st.spinner("AI가 답변을 생성하는 중입니다..."):
+        ai_message = get_ai_message(user_question)
+        with st.chat_message("ai"):
+            st.write(ai_message) # 질문 남기기
+        st.session_state.message_list.append({"role": "ai", "content": ai_message})
 print(f"after: {st.session_state.message_list}")
