@@ -64,7 +64,7 @@ def get_retriever():
         embedding=embedding,
         index_name=index_name
     )
-    retriever = database.as_retriever(search_kwargs={'k': 4})
+    retriever = database.as_retriever(search_kwargs={'k': 3})
     return retriever
 
 def get_history_retriever():
