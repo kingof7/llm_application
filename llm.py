@@ -68,7 +68,6 @@ def get_retriever():
     return retriever
 
 def get_history_retriever():
-    llm = get_llm()
     retriever = get_retriever()
 
     contextualize_q_system_prompt = (
@@ -92,15 +91,8 @@ def get_history_retriever():
     )
     return history_aware_retriever
 
-
-def get_llm():
-    llm = ChatUpstage()
-    return llm
-
-
 def get_dictionary_chain():
     dictionary = ["사람을 나타내는 표현 -> 거주자"]
-    llm = get_llm()
     prompt = ChatPromptTemplate.from_template(f"""
         사용자의 질문을 보고, 우리의 사전을 참고해서 사용자의 질문을 변경해주세요.
         만약 변경할 필요가 없다고 판단된다면, 사용자의 질문을 변경하지 않아도 됩니다.
@@ -114,9 +106,7 @@ def get_dictionary_chain():
 
     return dictionary_chain
 
-
 def get_rag_chain():
-    llm = get_llm()
     example_prompt = ChatPromptTemplate.from_messages(
         [
             ("human", "{input}"),
